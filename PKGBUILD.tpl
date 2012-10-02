@@ -4,22 +4,23 @@
 # then please put 'unknown'.
 
 # Maintainer: Your Name <youremail@domain.com>
-pkgname=NAME
-pkgver=VERSION
-pkgrel=1
+pkgname={name}
+pkgver={version}
+pkgrel={release}
 epoch=
-pkgdesc=""
-arch=()
-url=""
+pkgdesc="{short_desc}"
+arch=({arch})
+url="{homepage}"
+#TODO: find out where license is
 license=('GPL')
 groups=()
-depends=()
+depends=({dependencies})
 makedepends=()
 checkdepends=()
 optdepends=()
-provides=()
-conflicts=()
-replaces=()
+provides=({provides})
+conflicts=({conflicts})
+replaces=({replaces})
 backup=()
 options=()
 install=
