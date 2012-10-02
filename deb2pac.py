@@ -40,6 +40,20 @@ def decompress_deb(filepath):
 
     return tempdir
 
+def parse_dependencies(depends):
+
+    packages = []
+    parts = depends.split(", ")
+    for part in parts:
+        if "(" in part and part.endswith(")"):
+            package_name, _, version = part.partition(" ")
+            version = version.strip("()")
+        else:
+            package_name, version = (part, None)
+        packages.append((package_name, version))
+
+    return packages
+
 def parse_control_file(control_file):
 
     metadata = {}
@@ -54,6 +68,7 @@ def parse_control_file(control_file):
 
     desc.insert(0, metadata['Description'])
     metadata['Description'] = "\n".join(desc)
+    metadata['Depends'] = parse_dependencies(metadata['Depends'])
 
     return metadata
 
