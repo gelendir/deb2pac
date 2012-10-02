@@ -3,6 +3,10 @@ import sys
 import tempfile
 import subprocess
 import tarfile
+from pprint import pprint
+
+ENCODING = 'utf8'
+PKGBUILD_TEMPLATE = "PKGBUILD.tpl"
 
 def extract_tarfile(filepath, outdir):
 
@@ -57,11 +61,11 @@ if __name__ == "__main__":
 
     debpath = sys.argv[1]
     tmpdir = decompress_deb(debpath)
-    print tmpdir
+    pprint(tmpdir)
 
     control_file = os.path.join(tmpdir, "control", "control")
-    with open(control_file) as f:
+    with open(control_file, encoding=ENCODING) as f:
         metadata = parse_control_file(f)
 
-    print metadata
+    pprint(metadata)
 
