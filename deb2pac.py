@@ -26,13 +26,12 @@ def decompress_deb(filepath):
     tempdir = tempfile.mkdtemp()
     extract_arfile(filepath, tempdir)
 
-    control_file = os.path.join(tempdir, "control.tar.gz")
-    data_file = os.path.join(tempdir, "data.tar.gz")
-
-    for path in ["control", "data"]:
-        fullpath = os.path.join(tempdir, path)
+    for archive in ["control", "data"]:
+        fullpath = os.path.join(tempdir, archive)
         os.mkdir(fullpath)
-        tarfile = os.path.join(tempdir, "%s.tar.gz" % path)
+
+        filename = "{0}.tar.gz".format(archive)
+        tarfile = os.path.join(tempdir, filename)
         extract_tarfile(tarfile, fullpath)
 
     return tempdir
