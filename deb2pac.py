@@ -1,3 +1,4 @@
+import ar
 import os
 import sys
 import tempfile
@@ -15,15 +16,7 @@ def extract_tarfile(filepath, outdir):
 
 def extract_arfile(filepath, outdir):
 
-    cwd = os.getcwd()
-
-    abspath = os.path.abspath(filepath)
-    os.chdir(outdir)
-
-    cmd = ['ar', 'x', abspath]
-    subprocess.check_call(cmd)
-
-    os.chdir(cwd)
+    ar.extract_archive(filepath, outdir)
 
 def decompress_deb(filepath):
 
