@@ -35,23 +35,19 @@ def extract_tarfile(filepath, outdir):
         archive.extractall(outdir)
 
 def extract_arfile(filepath, outdir):
-
     ar.extract_archive(filepath, outdir)
 
-def decompress_deb(filepath):
+def decompress_deb(filepath, outdir):
 
-    tempdir = tempfile.mkdtemp()
-    extract_arfile(filepath, tempdir)
+    extract_arfile(filepath, outdir)
 
     for archive in ["control", "data"]:
-        fullpath = os.path.join(tempdir, archive)
-        os.mkdir(fullpath)
+        dirpath = os.path.join(outdir, archive)
+        os.mkdir(dirpath)
 
         filename = "{0}.tar.gz".format(archive)
-        tarfile = os.path.join(tempdir, filename)
-        extract_tarfile(tarfile, fullpath)
-
-    return tempdir
+        tarfile = os.path.join(outdir, filename)
+        extract_tarfile(tarfile, dirpath)
 
 def parse_pkgname(pkgname):
 
@@ -171,9 +167,11 @@ def create_pkgbuild(deb_pkgconfig, outdir):
 
 if __name__ == "__main__":
 
-    debpath = sys.argv[1]
-    tmpdir = decompress_deb(debpath)
+    tmpdir = tempfile.mkdtemp()
     pprint(tmpdir)
+
+    debpath = sys.argv[1]
+    decompress_deb(debpath, tmpdir)
 
     control_file = os.path.join(tmpdir, "control", "control")
     with open(control_file, encoding=ENCODING) as f:
