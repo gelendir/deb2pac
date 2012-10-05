@@ -106,6 +106,28 @@ def parse_control_file(control_file):
 
     return pkgconfig
 
+def transform_deb_config(debconfig):
+
+    version, release = debconfig['Version'].split("-")
+    short_desc = debconfig['Description'].split("\n")[0]
+
+    dependencies = [x[0] if isinstance(x, list) else x for x in debconfig['Depends']]
+
+    config = {
+        'name'          : debconfig['Package'],
+        'arch'          : debconfig['Architecture'],
+        'url'           : debconfig.get('Homepage', ''),
+        'provides'      : debconfig.get('Provides', ''),
+        'conflicts'     : debconfig.get('Conflicts', []),
+        'replaces'      : debconfig.get('Replaces', []),
+        'version'       : version,
+        'release'       : release,
+        'short_desc'    : short_desc,
+        'dependencies'  : dependencies,
+    }
+
+    return config
+
 if __name__ == "__main__":
 
     debpath = sys.argv[1]
@@ -117,4 +139,7 @@ if __name__ == "__main__":
         metadata = parse_control_file(f)
 
     pprint(metadata)
+
+    config = transform_deb_config(metadata)
+    pprint(config)
 
