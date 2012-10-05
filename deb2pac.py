@@ -14,6 +14,11 @@ PKGBUILD_TEMPLATE = "PKGBUILD.tpl"
 def debug(msg):
     logging.debug(pformat(msg))
 
+def file_read(path):
+    return open(path, encoding=ENCODING)
+
+def file_write(path):
+    return open(path, 'w', encoding=ENCODING)
 
 def extract_tarfile(filepath, outdir):
     with tarfile.open(filepath) as archive:
