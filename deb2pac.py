@@ -9,7 +9,9 @@ logging.basicConfig(level=logging.DEBUG)
 from pprint import pformat, pprint
 
 ENCODING = 'utf8'
-PKGBUILD_TEMPLATE = "PKGBUILD.tpl"
+
+PKGBUILD_TEMPLATE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "PKGBUILD.tpl")
 
 SIGN_TABLE = {
     '<<': '<',
@@ -128,6 +130,45 @@ def transform_deb_config(debconfig):
 
     return config
 
+def convert_pkg_version(package):
+
+    name, version = package
+
+    if version:
+        sign, number = version.split(" ")
+        name += "%s%s" % (SIGN_TABLE[sign], number)
+
+    return name
+
+def fill_pkgbuild_template(tpl, pkgconfig):
+
+    values = dict(pkgconfig)
+
+    values['arch'] = "'%s'" % values['arch']
+
+    for key in ['dependencies', 'provides', 'conflicts', 'replaces']:
+        relations = (convert_pkg_version(x) for x in values[key])
+        line = ' '.join("'%s'" % pkg for pkg in relations)
+        values[key] = line
+
+    return tpl.format(**values)
+
+def create_pkgbuild(deb_pkgconfig, outdir):
+
+    with file_read(PKGBUILD_TEMPLATE) as f:
+        tpl = f.read()
+
+    pkgconfig = transform_deb_config(deb_pkgconfig)
+    debug(pkgconfig)
+
+    pkgbuild = fill_pkgbuild_template(tpl, pkgconfig)
+    debug(pkgbuild)
+
+    pkgbuild_path = os.path.join(outdir, "PKGBUILD")
+
+    with file_write(pkgbuild_path) as f:
+        f.write(pkgbuild)
+
 if __name__ == "__main__":
 
     debpath = sys.argv[1]
@@ -142,4 +183,10 @@ if __name__ == "__main__":
 
     config = transform_deb_config(metadata)
     pprint(config)
+
+    with file_read(PKGBUILD_TEMPLATE) as f:
+        tpl = f.read()
+
+    pkgbuild = fill_pkgbuild_template(tpl, config)
+    pprint(pkgbuild)
 
