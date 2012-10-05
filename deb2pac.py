@@ -165,26 +165,29 @@ def create_pkgbuild(deb_pkgconfig, outdir):
     with file_write(pkgbuild_path) as f:
         f.write(pkgbuild)
 
-if __name__ == "__main__":
+def deb_to_pkgbuild(debpath):
 
     tmpdir = tempfile.mkdtemp()
-    pprint(tmpdir)
+    debug(tmpdir)
+
+    debdir = os.path.join(tmpdir, "debian")
+    archdir = os.path.join(tmpdir, "arch")
+
+    os.mkdir(debdir)
+    os.mkdir(archdir)
+
+    decompress_deb(debpath, debdir)
+
+    control_path = os.path.join(debdir, "control", "control")
+    with file_read(control_path) as f:
+        deb_pkgconfig = parse_control_file(f)
+        debug(deb_pkgconfig)
+
+    create_pkgbuild(deb_pkgconfig, archdir)
+
+    return tmpdir
+
+if __name__ == "__main__":
 
     debpath = sys.argv[1]
-    decompress_deb(debpath, tmpdir)
-
-    control_file = os.path.join(tmpdir, "control", "control")
-    with open(control_file, encoding=ENCODING) as f:
-        metadata = parse_control_file(f)
-
-    pprint(metadata)
-
-    config = transform_deb_config(metadata)
-    pprint(config)
-
-    with file_read(PKGBUILD_TEMPLATE) as f:
-        tpl = f.read()
-
-    pkgbuild = fill_pkgbuild_template(tpl, config)
-    pprint(pkgbuild)
-
+    deb_to_pkgbuild(debpath)
