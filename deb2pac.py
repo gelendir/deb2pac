@@ -2,7 +2,6 @@ import ar
 import os
 import sys
 import tempfile
-import subprocess
 import tarfile
 from pprint import pprint
 
