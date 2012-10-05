@@ -11,6 +11,14 @@ from pprint import pformat, pprint
 ENCODING = 'utf8'
 PKGBUILD_TEMPLATE = "PKGBUILD.tpl"
 
+SIGN_TABLE = {
+    '<<': '<',
+    '<=': '<=',
+    '=' : '=',
+    '>=': '>=',
+    '>>': '>',
+}
+
 def debug(msg):
     logging.debug(pformat(msg))
 
@@ -43,37 +51,60 @@ def decompress_deb(filepath):
 
     return tempdir
 
-def parse_dependencies(depends):
+def parse_pkgname(pkgname):
 
-    packages = []
-    parts = depends.split(", ")
-    for part in parts:
-        if "(" in part and part.endswith(")"):
-            package_name, _, version = part.partition(" ")
+    parsed = []
+    packages = pkgname.split(" | ")
+
+    for package in packages:
+
+        if "(" in package and package.endswith(")"):
+            package_name, _, version = package.partition(" ")
             version = version.strip("()")
         else:
-            package_name, version = (part, None)
-        packages.append((package_name, version))
+            package_name, version = (package, None)
 
-    return packages
+        parsed.append((package_name, version))
+
+    return parsed
+
+def parse_relationship(line):
+
+    parsed = []
+
+    pkgnames = line.split(", ")
+    for pkgname in pkgnames:
+
+        package = parse_pkgname(pkgname)
+        if len(package) > 1:
+            parsed.append(package)
+        else:
+            parsed.append(package[0])
+
+    return parsed
 
 def parse_control_file(control_file):
 
-    metadata = {}
+    pkgconfig = {}
     desc = []
 
-    for line in control_file:
-        if not line[0] == " ":
+    lines = (x for x in control_file if x.strip())
+
+    for line in lines:
+        if line[0] != " ":
             key, sep, value = line.strip().partition(": ")
-            metadata[key] = value
+            pkgconfig[key] = value
         else:
             desc.append(line.strip())
 
-    desc.insert(0, metadata['Description'])
-    metadata['Description'] = "\n".join(desc)
-    metadata['Depends'] = parse_dependencies(metadata['Depends'])
+    desc.insert(0, pkgconfig['Description'])
+    pkgconfig['Description'] = "\n".join(desc)
 
-    return metadata
+    for key in ['Depends', 'Conflicts', 'Provides', 'Replaces']:
+        if key in pkgconfig:
+            pkgconfig[key] = parse_relationship(pkgconfig[key])
+
+    return pkgconfig
 
 if __name__ == "__main__":
 
