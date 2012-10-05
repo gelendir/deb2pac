@@ -3,13 +3,19 @@ import os
 import sys
 import tempfile
 import tarfile
-from pprint import pprint
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+from pprint import pformat, pprint
 
 ENCODING = 'utf8'
 PKGBUILD_TEMPLATE = "PKGBUILD.tpl"
 
-def extract_tarfile(filepath, outdir):
+def debug(msg):
+    logging.debug(pformat(msg))
 
+
+def extract_tarfile(filepath, outdir):
     with tarfile.open(filepath) as archive:
         archive.extractall(outdir)
 
